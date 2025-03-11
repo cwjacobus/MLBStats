@@ -41,6 +41,7 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 		
 		List<MLBBattingStats>mlbBattingStatsList = DAO.getMLBBattingStatsList(playerName);
 		context.put("mlbBattingStatsList", mlbBattingStatsList);
+		context.put("batterName", mlbBattingStatsList.get(0).getPlayerName());
 	    stack.push(context);
 	    return "success";
 	}

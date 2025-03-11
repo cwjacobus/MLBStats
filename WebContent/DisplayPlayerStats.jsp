@@ -7,6 +7,7 @@
 </head>
 <body>
 	<h1>MLB Player Stats</h1>
+	<h3>${batterName}</h3>
 	<table>
 	<tr><th>year</th><th>pos</th><th>team</th><th>ab</th><th>h</th><th>ba</th><th>dbl</th><th>tpl</th><th>hr</th><th>bb</th><th>k</th>
 	<th>hbp</th><th>r</th><th>rbi</th><th>sb</th><th>pa</th><th>cs</th></tr>
