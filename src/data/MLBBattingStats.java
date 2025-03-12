@@ -1,6 +1,7 @@
 package data;
 
 public class MLBBattingStats {
+	private int mlbPlayerId;
 	private String playerName;
 	private String pos;
 	private String teamName;
@@ -20,9 +21,10 @@ public class MLBBattingStats {
 	private int plateAppearances;
 	private int caughtStealing;
 
-	public MLBBattingStats(String playerName, String pos, String teamName, int year, int atBats, int hits,
+	public MLBBattingStats(int mlbPlayerId, String playerName, String pos, String teamName, int year, int atBats, int hits,
 			double battingAverage, int doubles, int triples, int homeRuns, int walks, int strikeOuts, int hitByPitch,
 			int runs, int rbis, int stolenBases, int plateAppearances, int caughtStealing) {
+		this.mlbPlayerId = mlbPlayerId;
 		this.pos = pos;
 		this.playerName = playerName;
 		this.teamName = teamName;
@@ -43,6 +45,14 @@ public class MLBBattingStats {
 		this.caughtStealing = caughtStealing;
 	}
 	
+	public int getMlbPlayerId() {
+		return mlbPlayerId;
+	}
+
+	public void setMlbPlayerId(int mlbPlayerId) {
+		this.mlbPlayerId = mlbPlayerId;
+	}
+
 	public String getPlayerName() {
 		return playerName;
 	}
