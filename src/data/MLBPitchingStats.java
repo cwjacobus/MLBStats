@@ -122,6 +122,10 @@ public class MLBPitchingStats {
 		this.earnedRunsAllowed = earnedRunsAllowed;
 	}
 
+	public double getEarnedRunAverage() {
+		return getOuts() > 0 ? (double)(earnedRunsAllowed*9)/(getOuts()/3.0) : 0.0;
+	}
+
 	public int getWalks() {
 		return walks;
 	}
@@ -248,6 +252,15 @@ public class MLBPitchingStats {
 
 	public void setLosses(int losses) {
 		this.losses = losses;
+	}
+	
+	public int getOuts() {
+		int outs = 0;
+		String iPString = Double.toString(inningsPitched);
+		if (iPString != null && iPString.length() > 0 && iPString.contains(".")) {
+			outs = (Integer.parseInt(iPString.split("\\.")[0]) * 3) + Integer.parseInt(iPString.split("\\.")[1]);
+		}
+		return outs;
 	}
 	
 	public String toString() {

@@ -130,4 +130,22 @@ public class DAO {
 		
 		return mlbTeamList;	
 	}
+	
+	public static ArrayList<MLBTeam> getAllMLBTeamsList() {
+		ArrayList<MLBTeam> allTeams = new ArrayList<>();
+		try {
+			Statement stmt = conn.createStatement();
+			String sql = "SELECT * FROM MLB_TEAM ORDER BY SHORT_NAME, FIRST_YEAR_PLAYED";
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				MLBTeam team = new MLBTeam(rs.getInt("TEAM_ID"), rs.getInt("MLB_FRANCHISE_ID"), rs.getString("FULL_NAME"), rs.getString("SHORT_NAME"), 
+					rs.getString("LEAGUE"), rs.getInt("FIRST_YEAR_PLAYED"), rs.getInt("LAST_YEAR_PLAYED"));
+				allTeams.add(team);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return allTeams;
+	}
 }

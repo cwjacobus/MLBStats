@@ -1,6 +1,7 @@
 package actions;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.util.ValueStack;
 
 import dao.DAO;
+import data.MLBTeam;
 import init.MLBStatsDatabase;
 
 public class InitAction extends ActionSupport implements SessionAware {
@@ -36,7 +38,10 @@ public class InitAction extends ActionSupport implements SessionAware {
         	con = bowlPoolDB.reconnectAfterTimeout();
         	DAO.setConnection(con);
         }
-		
+        
+        ArrayList<MLBTeam> allMLBTeamsList = DAO.getAllMLBTeamsList();
+        context.put("allMLBTeamsList", allMLBTeamsList);
+        
 	    stack.push(context);
 	    return "success";
 	}
