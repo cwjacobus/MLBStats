@@ -26,6 +26,9 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 	String playerType;
 	String playerName;
 	Integer mlbPlayerId;
+	Integer teamId;
+	Integer year;
+	String teamMode;
 
 	public String execute() throws Exception {
 		ValueStack stack = ActionContext.getContext().getValueStack();
@@ -42,23 +45,27 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
         	con = bowlPoolDB.reconnectAfterTimeout();
         	DAO.setConnection(con);
         }
-        if (playerType == null) {
-        	return "success";  // change to return error
+        if (teamMode == null && playerType == null) {
+        	context.put("errorMsg", "Player type is required!");
+			stack.push(context);
+			return "error";
         }
-        if ((playerName == null || playerName.trim().length() == 0) && mlbPlayerId == null) {
-        	return "success";  // change to return error
+        if (teamMode == null && (playerName == null || playerName.trim().length() == 0) && mlbPlayerId == null) {
+        	context.put("errorMsg", "Player name is required!");
+			stack.push(context);
+			return "error";
         }
-        boolean batter = playerType.equals("batter");
+        
+        if (teamMode != null && (year == null || teamId == null)) {
+        	context.put("errorMsg", "Year and team are required!");
+			stack.push(context);
+			return "error";
+        }
         List<MLBBattingStats> mlbBattingStatsList = null;
         List<MLBPitchingStats> mlbPitchingStatsList = null;
+        boolean batter = teamMode == null && playerType.equals("batter");
         if (batter) {
         	mlbBattingStatsList = mlbPlayerId == null ? DAO.getMLBBattingStatsList(playerName):DAO.getMLBBattingStatsList(mlbPlayerId);
-        }
-        else {
-        	mlbPitchingStatsList = mlbPlayerId == null ? DAO.getMLBPitchingStatsList(playerName):DAO.getMLBPitchingStatsList(mlbPlayerId);
-        }
-		
-		if (batter) {
 			Map<Integer, MLBBattingStats> multipleBattersMap = new HashMap<>();
 			mlbBattingStatsList.stream().forEach(entry -> multipleBattersMap.put(entry.getMlbPlayerId(), entry));
 			if (multipleBattersMap.size() != 0 && multipleBattersMap.size() > 1) {
@@ -69,8 +76,10 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 				context.put("mlbBattingStatsList", mlbBattingStatsList);
 				context.put("batterName", mlbBattingStatsList.size() > 0 ? mlbBattingStatsList.get(0).getPlayerName(): null);
 			}
+			context.put("batter", batter);
 		}
-		else { // pitcher
+		else if (teamMode == null && !batter) { // pitcher
+			mlbPitchingStatsList = mlbPlayerId == null ? DAO.getMLBPitchingStatsList(playerName):DAO.getMLBPitchingStatsList(mlbPlayerId);
 			Map<Integer, MLBPitchingStats> multiplePitchersMap = new HashMap<>();
 			mlbPitchingStatsList.stream().forEach(entry -> multiplePitchersMap.put(entry.getMlbPlayerId(), entry));
 			if (multiplePitchersMap.size() != 0 && multiplePitchersMap.size() > 1) {
@@ -81,8 +90,13 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 				context.put("mlbPitchingStatsList", mlbPitchingStatsList);
 				context.put("pitcherName", mlbPitchingStatsList.size() > 0 ? mlbPitchingStatsList.get(0).getPlayerName(): null);
 			}
+			context.put("batter", batter);
 		}
-		context.put("batter", batter);
+		else { // team mode
+			mlbPitchingStatsList = DAO.getTeamMLBPitchingStatsListByYear(year, teamId);
+			context.put("mlbPitchingStatsList", mlbPitchingStatsList);
+		}
+        context.put("teamMode", teamMode);
 	    stack.push(context);
 	    return "success";
 	}
@@ -114,6 +128,30 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 
 	public void setMlbPlayerId(Integer mlbPlayerId) {
 		this.mlbPlayerId = mlbPlayerId;
+	}
+
+	public Integer getTeamId() {
+		return teamId;
+	}
+
+	public void setTeamId(Integer teamId) {
+		this.teamId = teamId;
+	}
+
+	public Integer getYear() {
+		return year;
+	}
+
+	public void setYear(Integer year) {
+		this.year = year;
+	}
+
+	public String getTeamMode() {
+		return teamMode;
+	}
+
+	public void setTeamMode(String teamMode) {
+		this.teamMode = teamMode;
 	}
 
 }

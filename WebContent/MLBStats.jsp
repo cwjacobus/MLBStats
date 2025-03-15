@@ -16,19 +16,20 @@
 		<input type="submit" value="Get Player Stats"/>
   	 </form>
   	 <br><br>
-  	 <form action="getPlayerStatsByTeam">
+  	 <form action="getPlayerStats">
       	<table>
       		<tr><td>Year</td><td><input type="number" name="year" min="1900" max="2025" style="width: 60px;"/></td></tr>
-      		<tr><td>Team</td><td><select name="teamName" id="teamName" style="width: 275px;">
+      		<tr><td>Team</td><td><select name="teamId" id="teamId" style="width: 275px;">
       		<c:forEach items="${allMLBTeamsList}" var="mlbTeam">
       			<c:set var="lastYearPlayed" value="${mlbTeam.lastYearPlayed}"/>
       			<c:if test="${lastYearPlayed == ''}">
       				<c:set var="lastYearPlayed" value="Present"/>
       			</c:if>
-  				<option value="${mlbTeam.shortTeamName}">${mlbTeam.fullTeamName} - ${mlbTeam.shortTeamName} (${mlbTeam.firstYearPlayed}-${lastYearPlayed})</option>	
+  				<option value="${mlbTeam.teamId}">${mlbTeam.fullTeamName} - ${mlbTeam.shortTeamName} (${mlbTeam.firstYearPlayed}-${lastYearPlayed})</option>	
 			</c:forEach>
       		</select></td></tr>
 		</table>
+		<input type="hidden" name="teamMode" value="true"/>
 		<input type="submit" value="Get Team Player Stats"/>
   	 </form>
 </body>

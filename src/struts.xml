@@ -9,12 +9,13 @@
             class="actions.GetPlayerStatsAction" 
             method="execute">
             <result name="success">/DisplayPlayerStats.jsp</result>
-            <result name="error">/DisplayPlayerStats.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
       </action>
       <action name="init" 
             class="actions.InitAction" 
             method="execute">
             <result name="success">/MLBStats.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
       </action>
    </package>
 </struts>
