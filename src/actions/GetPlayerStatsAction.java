@@ -1,15 +1,15 @@
 package actions;
 
-import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.SessionAware;
 
-import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.util.ValueStack;
@@ -17,7 +17,7 @@ import com.opensymphony.xwork2.util.ValueStack;
 import dao.DAO;
 import data.MLBBattingStats;
 import data.MLBPitchingStats;
-import init.MLBStatsDatabase;
+import data.MLBTeam;
 
 public class GetPlayerStatsAction extends ActionSupport implements SessionAware {
 	
@@ -28,78 +28,176 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 	Integer mlbPlayerId;
 	Integer teamId;
 	Integer year;
-	String teamMode;
 
 	public String execute() throws Exception {
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
 	    
-	    MLBStatsDatabase bowlPoolDB = (MLBStatsDatabase)ServletActionContext.getServletContext().getAttribute("Database");  
-        Connection con = bowlPoolDB.getCon();
-        DAO.setConnection(con);
-        try {
-        	DAO.pingDatabase();
-        }
-        catch (CommunicationsException ce) {
-        	System.out.println("DB Connection timed out - Reconnect");
-        	con = bowlPoolDB.reconnectAfterTimeout();
-        	DAO.setConnection(con);
-        }
-        if (teamMode == null && playerType == null) {
+	    if (teamId == null  && playerType == null) {
         	context.put("errorMsg", "Player type is required!");
 			stack.push(context);
 			return "error";
         }
-        if (teamMode == null && (playerName == null || playerName.trim().length() == 0) && mlbPlayerId == null) {
+        if (teamId == null && (playerName == null || playerName.trim().length() == 0) && mlbPlayerId == null) {
         	context.put("errorMsg", "Player name is required!");
 			stack.push(context);
 			return "error";
         }
         
-        if (teamMode != null && (year == null || teamId == null)) {
+        if (teamId != null && (year == null || teamId == null)) {
         	context.put("errorMsg", "Year and team are required!");
 			stack.push(context);
 			return "error";
         }
         List<MLBBattingStats> mlbBattingStatsList = null;
         List<MLBPitchingStats> mlbPitchingStatsList = null;
-        boolean batter = teamMode == null && playerType.equals("batter");
+        boolean batter = teamId == null && playerType.equals("batter");
         if (batter) {
         	mlbBattingStatsList = mlbPlayerId == null ? DAO.getMLBBattingStatsList(playerName):DAO.getMLBBattingStatsList(mlbPlayerId);
 			Map<Integer, MLBBattingStats> multipleBattersMap = new HashMap<>();
 			mlbBattingStatsList.stream().forEach(entry -> multipleBattersMap.put(entry.getMlbPlayerId(), entry));
-			if (multipleBattersMap.size() != 0 && multipleBattersMap.size() > 1) {
+			if (multipleBattersMap.size() > 1) {
 				List<MLBBattingStats> multipleBattersList = new ArrayList<>(multipleBattersMap.values());
 				context.put("multipleBattersList", multipleBattersList);
 			}
-			else {
+			else if (multipleBattersMap.size() == 1) {
 				context.put("mlbBattingStatsList", mlbBattingStatsList);
-				context.put("batterName", mlbBattingStatsList.size() > 0 ? mlbBattingStatsList.get(0).getPlayerName(): null);
 			}
-			context.put("batter", batter);
+			else {
+				context.put("errorMsg", "No stats found for: " + playerName);
+				stack.push(context);
+				return "error";
+			}
 		}
-		else if (teamMode == null && !batter) { // pitcher
+		else if (teamId == null && !batter) { // pitcher
 			mlbPitchingStatsList = mlbPlayerId == null ? DAO.getMLBPitchingStatsList(playerName):DAO.getMLBPitchingStatsList(mlbPlayerId);
 			Map<Integer, MLBPitchingStats> multiplePitchersMap = new HashMap<>();
 			mlbPitchingStatsList.stream().forEach(entry -> multiplePitchersMap.put(entry.getMlbPlayerId(), entry));
-			if (multiplePitchersMap.size() != 0 && multiplePitchersMap.size() > 1) {
+			if (multiplePitchersMap.size() > 1) {
 				List<MLBPitchingStats> multiplePitchersList = new ArrayList<>(multiplePitchersMap.values());
 				context.put("multiplePitchersList", multiplePitchersList);
 			}
-			else {
+			else if (multiplePitchersMap.size() == 1) {
 				context.put("mlbPitchingStatsList", mlbPitchingStatsList);
-				context.put("pitcherName", mlbPitchingStatsList.size() > 0 ? mlbPitchingStatsList.get(0).getPlayerName(): null);
 			}
-			context.put("batter", batter);
+			else {
+				context.put("errorMsg", "No stats found for: " + playerName);
+				stack.push(context);
+				return "error";
+			}
 		}
 		else { // team mode
 			mlbPitchingStatsList = DAO.getTeamMLBPitchingStatsListByYear(year, teamId);
+			mlbBattingStatsList = DAO.getTeamMLBBattingStatsListByYear(year, teamId);
+			if (mlbPitchingStatsList.size() == 0) {
+				context.put("errorMsg", "No pitching stats found for: " + year + "" + "TBD Team Name") ;
+				stack.push(context);
+				return "error";
+			}
+			else if ((mlbBattingStatsList.size() == 0)) {
+				context.put("errorMsg", "No batting stats found for: " + year + "" + "TBD Team Name");
+				stack.push(context);
+				return "error";
+			}
 			context.put("mlbPitchingStatsList", mlbPitchingStatsList);
+			context.put("mlbBattingStatsList", mlbBattingStatsList);
+			@SuppressWarnings("unchecked")
+			ArrayList<MLBTeam> allMLBTeamsList = (ArrayList<MLBTeam>)userSession.get("allMLBTeamsList");
+			String teamDisplayName = null;
+			Optional<MLBTeam> teamMatch = 
+					allMLBTeamsList
+				.stream()
+				.filter((p) -> (p.getTeamId() == teamId.intValue() && p.getFirstYearPlayed().intValue() <= year.intValue()
+					 && (p.getLastYearPlayed() == 0 || p.getLastYearPlayed().intValue() >= year.intValue())))
+				.findAny();
+			if (teamMatch.isPresent()) {
+				teamDisplayName = teamMatch.get().getFullTeamName();
+			}
+			context.put("teamDisplayName", teamDisplayName);
 		}
-        context.put("teamMode", teamMode);
 	    stack.push(context);
 	    return "success";
 	}
+	
+	public void sortBattingStatsList(List<MLBBattingStats> battersList, String type) 
+    { 
+			// Create a list from elements of HashMap 
+			Collections.sort(battersList, new Comparator<MLBBattingStats>() { 
+            public int compare(MLBBattingStats o1, MLBBattingStats o2) { 
+            	if (type.equals("SB")) {
+            		if (o1.getStolenBases() == o2.getStolenBases()) {
+            			return 0;
+            		}
+            		return (o1.getStolenBases() >= o2.getStolenBases() ? -1 : 1); 
+            	}
+            	else if (type.equals("H")){
+            		if (o1.getHits() == o2.getHits()) {
+            			return 0;
+            		}
+            		return (o1.getHits() > o2.getHits() ? -1 : 1);
+            	}
+            	else if (type.equals("HR")){
+            		if (o1.getHomeRuns() == o2.getHomeRuns()) {
+            			return 0;
+            		}
+            		return (o1.getHomeRuns() > o2.getHomeRuns() ? -1 : 1);
+            	}
+            	else {
+            		return 0;
+            	}
+            	/*else if (type.equals("RBI")){
+            		if (o1.getValue().getMlbBattingStats().getBattingStats().getRbis() == o2.getValue().getMlbBattingStats().getBattingStats().getRbis()) {
+            			return 0;
+            		}
+            		return (o1.getValue().getMlbBattingStats().getBattingStats().getRbis() > o2.getValue().getMlbBattingStats().getBattingStats().getRbis() ? -1 : 1);
+            	}
+            	else if (type.equals("PA")){
+            		if (o1.getValue().getMlbBattingStats().getBattingStats().getPlateAppearances() == o2.getValue().getMlbBattingStats().getBattingStats().getPlateAppearances()) {
+            			return 0;
+            		}
+            		return (o1.getValue().getMlbBattingStats().getBattingStats().getPlateAppearances() > o2.getValue().getMlbBattingStats().getBattingStats().getPlateAppearances() ? -1 : 1);
+            	}
+            	else if (type.equals("AVG")){
+            		int ab1 = o1.getValue().getMlbBattingStats().getBattingStats().getAtBats();
+            		int ab2 = o2.getValue().getMlbBattingStats().getBattingStats().getAtBats();
+            		double avg1 = ab1 != 0 ? ((double)o1.getValue().getMlbBattingStats().getBattingStats().getHits() / ab1) : 0.0;
+            		double avg2 = ab2 != 0 ? ((double)o2.getValue().getMlbBattingStats().getBattingStats().getHits() / ab2) : 0.0;
+            		if (avg1 == avg2) {
+            			return 0;
+            		}
+            		return (avg1 > avg2 ? -1 : 1);
+            	}
+            	else if (type.equals("GS")){
+            		// Use innings pitched as next sort criteria if tied
+            		if (o1.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted() == o2.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted()) {
+            			return (o1.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() >= o2.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() ? -1 : 1);
+            		}
+            		return (o1.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted() > o2.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted() ? -1 : 1);
+            	}
+            	else if (type.equals("SV")){
+            		if (o1.getValue().getMlbPitchingStats().getPitchingStats().getSaves() == o2.getValue().getMlbPitchingStats().getPitchingStats().getSaves()) {
+            			return 0;
+            		}
+            		return (o1.getValue().getMlbPitchingStats().getPitchingStats().getSaves() > o2.getValue().getMlbPitchingStats().getPitchingStats().getSaves() ? -1 : 1);
+            	}
+            	else if (type.equals("HD")){
+            		if (o1.getValue().getMlbPitchingStats().getPitchingStats().getHolds() == o2.getValue().getMlbPitchingStats().getPitchingStats().getHolds()) {
+            			return 0;
+            		}
+            		return (o1.getValue().getMlbPitchingStats().getPitchingStats().getHolds() > o2.getValue().getMlbPitchingStats().getPitchingStats().getHolds() ? -1 : 1);
+            	}
+            	else if (type.equals("IP")){
+            		if (o1.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() == o2.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched()) {
+            			return 0;
+            		}
+            		return (o1.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() > o2.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() ? -1 : 1);
+            	}
+            	else {
+            		return 0;
+            	}*/
+            } 
+        }); 
+    }
 	
 	@Override
     public void setSession(Map<String, Object> sessionMap) {
@@ -144,14 +242,6 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 
 	public void setYear(Integer year) {
 		this.year = year;
-	}
-
-	public String getTeamMode() {
-		return teamMode;
-	}
-
-	public void setTeamMode(String teamMode) {
-		this.teamMode = teamMode;
 	}
 
 }

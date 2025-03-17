@@ -2,7 +2,7 @@
 <%@ taglib prefix="s" uri="/struts-tags"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/fmt" prefix = "fmt"%>
-
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <html>
 <head>
 <title>MLB Player Stats</title>
@@ -12,14 +12,14 @@
 	<c:choose>
 	<c:when test="${!(multipleBattersList == null && multiplePitchersList == null)}">
 		Multiple players found:
-		<c:if test="${batter == 'true'}">
+		<c:if test="${multipleBattersList != null}">
 			<ul>
 			<c:forEach items="${multipleBattersList}" var="player">
   				<li><a href='/MLBStats/getPlayerStats?mlbPlayerId=${player.mlbPlayerId}&playerType=batter'>${player.playerName}</a></li>	
 			</c:forEach>
 			</ul>
 		</c:if>
-		<c:if test="${batter == 'false'}">
+		<c:if test="${multiplePitchersList != null}">
 			<ul>
 			<c:forEach items="${multiplePitchersList}" var="pitcher">
   				<li><a href='/MLBStats/getPlayerStats?mlbPlayerId=${pitcher.mlbPlayerId}&playerType=pitcher'>${pitcher.playerName}</a></li>	
@@ -27,20 +27,21 @@
 			</ul>
 		</c:if>
 	</c:when>
+	
 	<c:otherwise>
-		<c:if test="${teamMode == 'true' || (batter == 'true' && batterName != null && batterName != '')}">
+		<c:if test="${fn:length(mlbBattingStatsList) > 0}">
 			<c:choose>
-			<c:when test="${teamMode == 'true'}">
-				<h3>${year} TBD Team Name</h3>
+			<c:when test="${teamDisplayName != null}">
+				<h3>${year} ${teamDisplayName}</h3>
 			</c:when>
 			<c:otherwise>
-				<h3>${batterName}</h3>
+				<h3>${mlbBattingStatsList[0].playerName}</h3>
 			</c:otherwise>
 			</c:choose>
 			<table>
 			<tr>
 			<c:choose>
-			<c:when test = "${teamMode == 'true'}">
+			<c:when test = "${teamDisplayName != null}">
 				<th>name</th>
 			</c:when>
 			<c:otherwise>
@@ -52,7 +53,7 @@
 			<c:forEach var="mlbBattingStats" items="${mlbBattingStatsList}" >
 				<tr>
 				<c:choose>
-				<c:when test = "${teamMode == 'true'}">
+				<c:when test = "${teamDisplayName != null}">
 					<td>${mlbBattingStats.playerName}</td>
 				</c:when>
 				<c:otherwise>
@@ -78,15 +79,16 @@
 				</tr>
 			</c:forEach>
 			</table>
+			<br><br>
 		</c:if>
-		<c:if test="${teamMode == 'true' || (batter == 'false' && pitcherName != null && pitcherName != '')}">
-			<c:if test="${teamMode == 'false'}">
-				<h3>${pitcherName}</h3>
+		<c:if test="${fn:length(mlbPitchingStatsList) > 0}">
+			<c:if test="${teamDisplayName == null}">
+				<h3>${mlbPitchingStatsList[0].playerName}</h3>
 			</c:if>
 			<table>
 			<tr>
 			<c:choose>
-			<c:when test = "${teamMode == 'true'}">
+			<c:when test = "${teamDisplayName != null}">
 				<th>name</th>
 			</c:when>
 			<c:otherwise>
@@ -98,7 +100,7 @@
 			<c:forEach var="mlbPitchingStats" items="${mlbPitchingStatsList}" >
 				<tr>
 				<c:choose>
-				<c:when test = "${teamMode == 'true'}">
+				<c:when test = "${teamDisplayName != null}">
 					<td>${mlbPitchingStats.playerName}</td>
 				</c:when>
 				<c:otherwise>

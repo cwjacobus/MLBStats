@@ -20,7 +20,7 @@
       	<table>
       		<tr><td>Year</td><td><input type="number" name="year" min="1900" max="2025" style="width: 60px;"/></td></tr>
       		<tr><td>Team</td><td><select name="teamId" id="teamId" style="width: 275px;">
-      		<c:forEach items="${allMLBTeamsList}" var="mlbTeam">
+      		<c:forEach items="${sessionScope.allMLBTeamsList}" var="mlbTeam">
       			<c:set var="lastYearPlayed" value="${mlbTeam.lastYearPlayed}"/>
       			<c:if test="${lastYearPlayed == ''}">
       				<c:set var="lastYearPlayed" value="Present"/>

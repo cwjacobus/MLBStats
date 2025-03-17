@@ -40,7 +40,7 @@ public class InitAction extends ActionSupport implements SessionAware {
         }
         
         ArrayList<MLBTeam> allMLBTeamsList = DAO.getAllMLBTeamsList();
-        context.put("allMLBTeamsList", allMLBTeamsList);
+        userSession.put("allMLBTeamsList", allMLBTeamsList);
         
 	    stack.push(context);
 	    return "success";

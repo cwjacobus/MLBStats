@@ -111,7 +111,7 @@ public class DAO {
 		return mlbPitchingStatsList;
 	}
 	
-	public static List<MLBBattingStats> getTeamMLBBattingStatsList(Integer year, Integer teamId) {
+	public static List<MLBBattingStats> getTeamMLBBattingStatsListByYear(Integer year, Integer teamId) {
 		List<MLBBattingStats>mlbBattingStatsList = new ArrayList<MLBBattingStats>();
 		try {
 			// Get positions played by player
