@@ -27,15 +27,14 @@
 			</ul>
 		</c:if>
 	</c:when>
-	
 	<c:otherwise>
-		<c:if test="${fn:length(mlbBattingStatsList) > 0}">
+		<c:if test="${fn:length(sessionScope.mlbBattingStatsList) > 0}">
 			<c:choose>
 			<c:when test="${teamDisplayName != null}">
 				<h3>${year} ${teamDisplayName}</h3>
 			</c:when>
 			<c:otherwise>
-				<h3>${mlbBattingStatsList[0].playerName}</h3>
+				<h3>${sessionScope.mlbBattingStatsList[0].playerName}</h3>
 			</c:otherwise>
 			</c:choose>
 			<table>
@@ -48,9 +47,12 @@
 				<th>year</th><th>team</th>
 			</c:otherwise>
 			</c:choose>
-			<th>ab</th><th>h</th><th>ba</th><th>dbl</th><th>tpl</th><th>hr</th><th>bb</th><th>k</th><th>hbp</th><th>r</th><th>rbi</th>
+			<c:set var="pURL" value="/MLBStats/getPlayerStats?mlbPlayerId=${sessionScope.mlbBattingStatsList[0].mlbPlayerId}&playerType=batter&battingSortType="/>
+			<th>ab</th><th>h</th><th>ba</th><th>dbl</th><th>tpl</th>
+			<th><a href='${pURL}HR'>hr</a></th>
+			<th>bb</th><th>k</th><th>hbp</th><th>r</th><th>rbi</th>
 			<th>sb</th><th>pa</th><th>cs</th><th>pos</th></tr>
-			<c:forEach var="mlbBattingStats" items="${mlbBattingStatsList}" >
+			<c:forEach var="mlbBattingStats" items="${sessionScope.mlbBattingStatsList}" >
 				<tr>
 				<c:choose>
 				<c:when test = "${teamDisplayName != null}">
@@ -81,9 +83,9 @@
 			</table>
 			<br><br>
 		</c:if>
-		<c:if test="${fn:length(mlbPitchingStatsList) > 0}">
+		<c:if test="${fn:length(sessionScope.mlbPitchingStatsList) > 0}">
 			<c:if test="${teamDisplayName == null}">
-				<h3>${mlbPitchingStatsList[0].playerName}</h3>
+				<h3>${sessionScope.mlbPitchingStatsList[0].playerName}</h3>
 			</c:if>
 			<table>
 			<tr>
@@ -97,7 +99,7 @@
 			</c:choose>
 			<th>ip</th><th>r</th><th>er</th><th>era</th><th>k</th><th>hr</th><th>sb</th><th>hb</th><th>h</th>
 			<th>hd</th><th>sv</th><th>bs</th><th>gs</th><th>bk</th><th>wp</th><th>sf</th><th>bf</th><th>w</th><th>l</th></tr>
-			<c:forEach var="mlbPitchingStats" items="${mlbPitchingStatsList}" >
+			<c:forEach var="mlbPitchingStats" items="${sessionScope.mlbPitchingStatsList}" >
 				<tr>
 				<c:choose>
 				<c:when test = "${teamDisplayName != null}">

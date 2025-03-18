@@ -28,11 +28,18 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 	Integer mlbPlayerId;
 	Integer teamId;
 	Integer year;
+	String battingSortType;
+	String pitchingSortType;
 
+	@SuppressWarnings("unchecked")
 	public String execute() throws Exception {
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
-	    
+	    if (userSession == null || userSession.size() == 0) {
+			context.put("errorMsg", "Session has expired!");
+			stack.push(context);
+			return "error";
+		}
 	    if (teamId == null  && playerType == null) {
         	context.put("errorMsg", "Player type is required!");
 			stack.push(context);
@@ -49,11 +56,14 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 			stack.push(context);
 			return "error";
         }
-        List<MLBBattingStats> mlbBattingStatsList = null;
-        List<MLBPitchingStats> mlbPitchingStatsList = null;
+        
+		List<MLBBattingStats> mlbBattingStatsList = (List<MLBBattingStats>)userSession.get("mlbBattingStatsList");
+        List<MLBPitchingStats> mlbPitchingStatsList = (List<MLBPitchingStats>)userSession.get("mlbPitchingStatsList");
         boolean batter = teamId == null && playerType.equals("batter");
         if (batter) {
-        	mlbBattingStatsList = mlbPlayerId == null ? DAO.getMLBBattingStatsList(playerName):DAO.getMLBBattingStatsList(mlbPlayerId);
+        	if (battingSortType == null) {
+        		mlbBattingStatsList = mlbPlayerId == null ? DAO.getMLBBattingStatsList(playerName):DAO.getMLBBattingStatsList(mlbPlayerId);
+        	}
 			Map<Integer, MLBBattingStats> multipleBattersMap = new HashMap<>();
 			mlbBattingStatsList.stream().forEach(entry -> multipleBattersMap.put(entry.getMlbPlayerId(), entry));
 			if (multipleBattersMap.size() > 1) {
@@ -61,7 +71,10 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 				context.put("multipleBattersList", multipleBattersList);
 			}
 			else if (multipleBattersMap.size() == 1) {
-				context.put("mlbBattingStatsList", mlbBattingStatsList);
+				if (battingSortType != null) {
+					sortBattingStatsList(mlbBattingStatsList, battingSortType);
+				}
+				userSession.put("mlbBattingStatsList", mlbBattingStatsList);
 			}
 			else {
 				context.put("errorMsg", "No stats found for: " + playerName);
@@ -70,7 +83,9 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 			}
 		}
 		else if (teamId == null && !batter) { // pitcher
-			mlbPitchingStatsList = mlbPlayerId == null ? DAO.getMLBPitchingStatsList(playerName):DAO.getMLBPitchingStatsList(mlbPlayerId);
+			if (pitchingSortType == null) {
+				mlbPitchingStatsList = mlbPlayerId == null ? DAO.getMLBPitchingStatsList(playerName):DAO.getMLBPitchingStatsList(mlbPlayerId);
+			}
 			Map<Integer, MLBPitchingStats> multiplePitchersMap = new HashMap<>();
 			mlbPitchingStatsList.stream().forEach(entry -> multiplePitchersMap.put(entry.getMlbPlayerId(), entry));
 			if (multiplePitchersMap.size() > 1) {
@@ -78,7 +93,7 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 				context.put("multiplePitchersList", multiplePitchersList);
 			}
 			else if (multiplePitchersMap.size() == 1) {
-				context.put("mlbPitchingStatsList", mlbPitchingStatsList);
+				userSession.put("mlbPitchingStatsList", mlbPitchingStatsList);
 			}
 			else {
 				context.put("errorMsg", "No stats found for: " + playerName);
@@ -101,7 +116,6 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 			}
 			context.put("mlbPitchingStatsList", mlbPitchingStatsList);
 			context.put("mlbBattingStatsList", mlbBattingStatsList);
-			@SuppressWarnings("unchecked")
 			ArrayList<MLBTeam> allMLBTeamsList = (ArrayList<MLBTeam>)userSession.get("allMLBTeamsList");
 			String teamDisplayName = null;
 			Optional<MLBTeam> teamMatch = 
@@ -242,6 +256,22 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 
 	public void setYear(Integer year) {
 		this.year = year;
+	}
+
+	public String getBattingSortType() {
+		return battingSortType;
+	}
+
+	public void setBattingSortType(String battingSortType) {
+		this.battingSortType = battingSortType;
+	}
+
+	public String getPitchingSortType() {
+		return pitchingSortType;
+	}
+
+	public void setPitchingSortType(String pitchingSortType) {
+		this.pitchingSortType = pitchingSortType;
 	}
 
 }
