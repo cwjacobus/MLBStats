@@ -109,13 +109,16 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 				stack.push(context);
 				return "error";
 			}
-			else if ((mlbBattingStatsList.size() == 0)) {
+			else if ((mlbBattingStatsList.size() == 0)) {	
 				context.put("errorMsg", "No batting stats found for: " + year + "" + "TBD Team Name");
 				stack.push(context);
 				return "error";
 			}
-			context.put("mlbPitchingStatsList", mlbPitchingStatsList);
-			context.put("mlbBattingStatsList", mlbBattingStatsList);
+			if (battingSortType != null) {
+				sortBattingStatsList(mlbBattingStatsList, battingSortType);
+			}
+			userSession.put("mlbPitchingStatsList", mlbPitchingStatsList);
+			userSession.put("mlbBattingStatsList", mlbBattingStatsList);
 			ArrayList<MLBTeam> allMLBTeamsList = (ArrayList<MLBTeam>)userSession.get("allMLBTeamsList");
 			String teamDisplayName = null;
 			Optional<MLBTeam> teamMatch = 
@@ -128,6 +131,7 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 				teamDisplayName = teamMatch.get().getFullTeamName();
 			}
 			context.put("teamDisplayName", teamDisplayName);
+			context.put("teamId", teamId);
 		}
 	    stack.push(context);
 	    return "success";
@@ -135,7 +139,6 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 	
 	public void sortBattingStatsList(List<MLBBattingStats> battersList, String type) 
     { 
-			// Create a list from elements of HashMap 
 			Collections.sort(battersList, new Comparator<MLBBattingStats>() { 
             public int compare(MLBBattingStats o1, MLBBattingStats o2) { 
             	if (type.equals("SB")) {
@@ -156,32 +159,25 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
             		}
             		return (o1.getHomeRuns() > o2.getHomeRuns() ? -1 : 1);
             	}
-            	else {
-            		return 0;
-            	}
-            	/*else if (type.equals("RBI")){
-            		if (o1.getValue().getMlbBattingStats().getBattingStats().getRbis() == o2.getValue().getMlbBattingStats().getBattingStats().getRbis()) {
+            	else if (type.equals("RBI")){
+            		if (o1.getRbis() == o2.getRbis()) {
             			return 0;
             		}
-            		return (o1.getValue().getMlbBattingStats().getBattingStats().getRbis() > o2.getValue().getMlbBattingStats().getBattingStats().getRbis() ? -1 : 1);
+            		return (o1.getRbis() > o2.getRbis() ? -1 : 1);
             	}
             	else if (type.equals("PA")){
-            		if (o1.getValue().getMlbBattingStats().getBattingStats().getPlateAppearances() == o2.getValue().getMlbBattingStats().getBattingStats().getPlateAppearances()) {
+            		if (o1.getPlateAppearances() == o2.getPlateAppearances()) {
             			return 0;
             		}
-            		return (o1.getValue().getMlbBattingStats().getBattingStats().getPlateAppearances() > o2.getValue().getMlbBattingStats().getBattingStats().getPlateAppearances() ? -1 : 1);
+            		return (o1.getPlateAppearances() > o2.getPlateAppearances() ? -1 : 1);
             	}
-            	else if (type.equals("AVG")){
-            		int ab1 = o1.getValue().getMlbBattingStats().getBattingStats().getAtBats();
-            		int ab2 = o2.getValue().getMlbBattingStats().getBattingStats().getAtBats();
-            		double avg1 = ab1 != 0 ? ((double)o1.getValue().getMlbBattingStats().getBattingStats().getHits() / ab1) : 0.0;
-            		double avg2 = ab2 != 0 ? ((double)o2.getValue().getMlbBattingStats().getBattingStats().getHits() / ab2) : 0.0;
-            		if (avg1 == avg2) {
+            	else if (type.equals("BA")){
+            		if (o1.getBattingAverage() == o2.getBattingAverage()) {
             			return 0;
             		}
-            		return (avg1 > avg2 ? -1 : 1);
+            		return (o1.getBattingAverage() > o2.getBattingAverage() ? -1 : 1);
             	}
-            	else if (type.equals("GS")){
+            	/*else if (type.equals("GS")){
             		// Use innings pitched as next sort criteria if tied
             		if (o1.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted() == o2.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted()) {
             			return (o1.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() >= o2.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() ? -1 : 1);
@@ -205,10 +201,10 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
             			return 0;
             		}
             		return (o1.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() > o2.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() ? -1 : 1);
-            	}
+            	} */
             	else {
             		return 0;
-            	}*/
+            	}
             } 
         }); 
     }

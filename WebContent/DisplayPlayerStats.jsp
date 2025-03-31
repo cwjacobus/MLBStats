@@ -30,38 +30,50 @@
 	<c:otherwise>
 		<c:if test="${fn:length(sessionScope.mlbBattingStatsList) > 0}">
 			<c:choose>
-			<c:when test="${teamDisplayName != null}">
-				<h3>${year} ${teamDisplayName}</h3>
-			</c:when>
-			<c:otherwise>
-				<h3>${sessionScope.mlbBattingStatsList[0].playerName}</h3>
-			</c:otherwise>
+				<c:when test="${teamDisplayName != null}">
+					<h3>${year} ${teamDisplayName}</h3>
+				</c:when>
+				<c:otherwise>
+					<h3>${sessionScope.mlbBattingStatsList[0].playerName}</h3>
+				</c:otherwise>
 			</c:choose>
 			<table>
 			<tr>
 			<c:choose>
-			<c:when test = "${teamDisplayName != null}">
-				<th>name</th>
-			</c:when>
-			<c:otherwise>
-				<th>year</th><th>team</th>
-			</c:otherwise>
+				<c:when test = "${teamDisplayName != null}">
+					<th>name</th>
+					<c:set var="pURL" value="/MLBStats/getPlayerStats?year=${year}&teamId=${teamId}&teamMode=true&battingSortType="/>
+				</c:when>
+				<c:otherwise>
+					<th>year</th><th>team</th>
+					<c:set var="pURL" value="/MLBStats/getPlayerStats?mlbPlayerId=${sessionScope.mlbBattingStatsList[0].mlbPlayerId}&playerType=batter&battingSortType="/>
+				</c:otherwise>
 			</c:choose>
-			<c:set var="pURL" value="/MLBStats/getPlayerStats?mlbPlayerId=${sessionScope.mlbBattingStatsList[0].mlbPlayerId}&playerType=batter&battingSortType="/>
-			<th>ab</th><th>h</th><th>ba</th><th>dbl</th><th>tpl</th>
+			<th>ab</th>
+			<th><a href='${pURL}H'>h</a></th>
+			<th><a href='${pURL}BA'>ba</a></th>
+			<th>dbl</th>
+			<th>tpl</th>
 			<th><a href='${pURL}HR'>hr</a></th>
-			<th>bb</th><th>k</th><th>hbp</th><th>r</th><th>rbi</th>
-			<th>sb</th><th>pa</th><th>cs</th><th>pos</th></tr>
+			<th>bb</th>
+			<th>k</th>
+			<th>hbp</th>
+			<th>r</th>
+			<th><a href='${pURL}RBI'>rbi</a></th>
+			<th><a href='${pURL}SB'>sb</a></th>
+			<th><a href='${pURL}PA'>pa</a></th>
+			<th>cs</th>
+			<th>pos</th></tr>
 			<c:forEach var="mlbBattingStats" items="${sessionScope.mlbBattingStatsList}" >
 				<tr>
 				<c:choose>
-				<c:when test = "${teamDisplayName != null}">
-					<td>${mlbBattingStats.playerName}</td>
-				</c:when>
-				<c:otherwise>
-					<td>${mlbBattingStats.year}</td>
-					<td>${mlbBattingStats.teamName}</td>
-				</c:otherwise>
+					<c:when test = "${teamDisplayName != null}">
+						<td>${mlbBattingStats.playerName}</td>
+					</c:when>
+					<c:otherwise>
+						<td>${mlbBattingStats.year}</td>
+						<td>${mlbBattingStats.teamName}</td>
+					</c:otherwise>
 				</c:choose>
 				<td>${mlbBattingStats.atBats}</td>
 				<td>${mlbBattingStats.hits}</td>
@@ -90,25 +102,25 @@
 			<table>
 			<tr>
 			<c:choose>
-			<c:when test = "${teamDisplayName != null}">
-				<th>name</th>
-			</c:when>
-			<c:otherwise>
-				<th>year</th><th>team</th>
-			</c:otherwise>
+				<c:when test = "${teamDisplayName != null}">
+					<th>name</th>
+				</c:when>
+				<c:otherwise>
+					<th>year</th><th>team</th>
+				</c:otherwise>
 			</c:choose>
 			<th>ip</th><th>r</th><th>er</th><th>era</th><th>k</th><th>hr</th><th>sb</th><th>hb</th><th>h</th>
 			<th>hd</th><th>sv</th><th>bs</th><th>gs</th><th>bk</th><th>wp</th><th>sf</th><th>bf</th><th>w</th><th>l</th></tr>
 			<c:forEach var="mlbPitchingStats" items="${sessionScope.mlbPitchingStatsList}" >
 				<tr>
 				<c:choose>
-				<c:when test = "${teamDisplayName != null}">
-					<td>${mlbPitchingStats.playerName}</td>
-				</c:when>
-				<c:otherwise>
-					<td>${mlbPitchingStats.year}</td>
-					<td>${mlbPitchingStats.teamName}</td>
-				</c:otherwise>
+					<c:when test = "${teamDisplayName != null}">
+						<td>${mlbPitchingStats.playerName}</td>
+					</c:when>
+					<c:otherwise>
+						<td>${mlbPitchingStats.year}</td>
+						<td>${mlbPitchingStats.teamName}</td>
+					</c:otherwise>
 				</c:choose>
 				<td>${mlbPitchingStats.inningsPitched}</td>
 				<td>${mlbPitchingStats.runsAllowed}</td>
