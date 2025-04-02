@@ -75,6 +75,7 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 					sortBattingStatsList(mlbBattingStatsList, battingSortType);
 				}
 				userSession.put("mlbBattingStatsList", mlbBattingStatsList);
+				context.put("playerType", playerType);
 			}
 			else {
 				context.put("errorMsg", "No stats found for: " + playerName);
@@ -93,7 +94,11 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 				context.put("multiplePitchersList", multiplePitchersList);
 			}
 			else if (multiplePitchersMap.size() == 1) {
+				if (pitchingSortType != null) {
+					sortPitchingStatsList(mlbPitchingStatsList, pitchingSortType);
+				}
 				userSession.put("mlbPitchingStatsList", mlbPitchingStatsList);
+				context.put("playerType", playerType);
 			}
 			else {
 				context.put("errorMsg", "No stats found for: " + playerName);
@@ -116,6 +121,9 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 			}
 			if (battingSortType != null) {
 				sortBattingStatsList(mlbBattingStatsList, battingSortType);
+			}
+			if (pitchingSortType != null) {
+				sortPitchingStatsList(mlbPitchingStatsList, pitchingSortType);
 			}
 			userSession.put("mlbPitchingStatsList", mlbPitchingStatsList);
 			userSession.put("mlbBattingStatsList", mlbBattingStatsList);
@@ -177,31 +185,179 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
             		}
             		return (o1.getBattingAverage() > o2.getBattingAverage() ? -1 : 1);
             	}
-            	/*else if (type.equals("GS")){
-            		// Use innings pitched as next sort criteria if tied
-            		if (o1.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted() == o2.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted()) {
-            			return (o1.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() >= o2.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() ? -1 : 1);
+            	else if (type.equals("AB")){
+            		if (o1.getAtBats() == o2.getAtBats()) {
+            			return 0;
             		}
-            		return (o1.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted() > o2.getValue().getMlbPitchingStats().getPitchingStats().getGamesStarted() ? -1 : 1);
+            		return (o1.getAtBats() > o2.getAtBats() ? -1 : 1);
+            	}
+            	else if (type.equals("DB")){
+            		if (o1.getDoubles() == o2.getDoubles()) {
+            			return 0;
+            		}
+            		return (o1.getDoubles() > o2.getDoubles() ? -1 : 1);
+            	}
+            	else if (type.equals("TR")){
+            		if (o1.getTriples() == o2.getTriples()) {
+            			return 0;
+            		}
+            		return (o1.getTriples() > o2.getTriples() ? -1 : 1);
+            	}
+            	else if (type.equals("BB")){
+            		if (o1.getWalks() == o2.getWalks()) {
+            			return 0;
+            		}
+            		return (o1.getWalks() > o2.getWalks() ? -1 : 1);
+            	}
+            	else if (type.equals("K")){
+            		if (o1.getStrikeOuts() == o2.getStrikeOuts()) {
+            			return 0;
+            		}
+            		return (o1.getStrikeOuts() > o2.getStrikeOuts() ? -1 : 1);
+            	}
+            	else if (type.equals("HBP")){
+            		if (o1.getHitByPitch() == o2.getHitByPitch()) {
+            			return 0;
+            		}
+            		return (o1.getHitByPitch() > o2.getHitByPitch() ? -1 : 1);
+            	}
+            	else if (type.equals("R")){
+            		if (o1.getRuns() == o2.getRuns()) {
+            			return 0;
+            		}
+            		return (o1.getRuns() > o2.getRuns() ? -1 : 1);
+            	}
+            	else if (type.equals("CS")){
+            		if (o1.getCaughtStealing() == o2.getCaughtStealing()) {
+            			return 0;
+            		}
+            		return (o1.getCaughtStealing() > o2.getCaughtStealing() ? -1 : 1);
+            	}
+            	else {
+            		return 0;
+            	}
+            } 
+        }); 
+    }
+	
+	public void sortPitchingStatsList(List<MLBPitchingStats> battersList, String type) 
+    { 
+			Collections.sort(battersList, new Comparator<MLBPitchingStats>() { 
+            public int compare(MLBPitchingStats o1, MLBPitchingStats o2) { 
+            	if (type.equals("GS")) {
+            		if (o1.getGamesStarted() == o2.getGamesStarted()) {
+            			return 0;
+            		}
+            		return (o1.getGamesStarted() >= o2.getGamesStarted() ? -1 : 1); 
             	}
             	else if (type.equals("SV")){
-            		if (o1.getValue().getMlbPitchingStats().getPitchingStats().getSaves() == o2.getValue().getMlbPitchingStats().getPitchingStats().getSaves()) {
+            		if (o1.getSaves() == o2.getSaves()) {
             			return 0;
             		}
-            		return (o1.getValue().getMlbPitchingStats().getPitchingStats().getSaves() > o2.getValue().getMlbPitchingStats().getPitchingStats().getSaves() ? -1 : 1);
+            		return (o1.getSaves() > o2.getSaves() ? -1 : 1);
             	}
             	else if (type.equals("HD")){
-            		if (o1.getValue().getMlbPitchingStats().getPitchingStats().getHolds() == o2.getValue().getMlbPitchingStats().getPitchingStats().getHolds()) {
+            		if (o1.getHolds() == o2.getHolds()) {
             			return 0;
             		}
-            		return (o1.getValue().getMlbPitchingStats().getPitchingStats().getHolds() > o2.getValue().getMlbPitchingStats().getPitchingStats().getHolds() ? -1 : 1);
+            		return (o1.getHolds() > o2.getHolds() ? -1 : 1);
             	}
             	else if (type.equals("IP")){
-            		if (o1.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() == o2.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched()) {
+            		if (o1.getInningsPitched() == o2.getInningsPitched()) {
             			return 0;
             		}
-            		return (o1.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() > o2.getValue().getMlbPitchingStats().getPitchingStats().getInningsPitched() ? -1 : 1);
-            	} */
+            		return (o1.getInningsPitched() > o2.getInningsPitched() ? -1 : 1);
+            	}
+            	else if (type.equals("R")) {
+            		if (o1.getRunsAllowed() == o2.getRunsAllowed()) {
+            			return 0;
+            		}
+            		return (o1.getRunsAllowed() >= o2.getRunsAllowed() ? -1 : 1); 
+            	}
+            	else if (type.equals("ER")){
+            		if (o1.getEarnedRunsAllowed() == o2.getEarnedRunsAllowed()) {
+            			return 0;
+            		}
+            		return (o1.getEarnedRunsAllowed() > o2.getEarnedRunsAllowed() ? -1 : 1);
+            	}
+            	else if (type.equals("ERA")){  // ERA only stat sorted L to H
+            		if (o1.getEarnedRunAverage() == o2.getEarnedRunAverage()) {
+            			return 0;
+            		}
+            		return (o1.getEarnedRunAverage() < o2.getEarnedRunAverage() ? -1 : 1);
+            	}
+            	else if (type.equals("K")){
+            		if (o1.getStrikeouts() == o2.getStrikeouts()) {
+            			return 0;
+            		}
+            		return (o1.getStrikeouts() > o2.getStrikeouts() ? -1 : 1);
+            	}
+            	else if (type.equals("HR")) {
+            		if (o1.getHomeRunsAllowed() == o2.getHomeRunsAllowed()) {
+            			return 0;
+            		}
+            		return (o1.getHomeRunsAllowed() >= o2.getHomeRunsAllowed() ? -1 : 1); 
+            	}
+            	else if (type.equals("SB")){
+            		if (o1.getStolenBasesAllowed() == o2.getStolenBasesAllowed()) {
+            			return 0;
+            		}
+            		return (o1.getStolenBasesAllowed() > o2.getStolenBasesAllowed() ? -1 : 1);
+            	}
+            	else if (type.equals("HB")){
+            		if (o1.getHitBatters() == o2.getHitBatters()) {
+            			return 0;
+            		}
+            		return (o1.getHitBatters() > o2.getHitBatters() ? -1 : 1);
+            	}
+            	else if (type.equals("H")){
+            		if (o1.getHitsAllowed() == o2.getHitsAllowed()) {
+            			return 0;
+            		}
+            		return (o1.getHitsAllowed() > o2.getHitsAllowed() ? -1 : 1);
+            	}
+            	else if (type.equals("BS")){
+            		if (o1.getBlownSaves() == o2.getBlownSaves()) {
+            			return 0;
+            		}
+            		return (o1.getBlownSaves() > o2.getBlownSaves() ? -1 : 1);
+            	}
+            	else if (type.equals("BK")){
+            		if (o1.getBalks() == o2.getBalks()) {
+            			return 0;
+            		}
+            		return (o1.getBalks() > o2.getBalks() ? -1 : 1);
+            	}
+            	else if (type.equals("WP")){
+            		if (o1.getWildPitches() == o2.getWildPitches()) {
+            			return 0;
+            		}
+            		return (o1.getWildPitches() > o2.getWildPitches() ? -1 : 1);
+            	}
+            	else if (type.equals("SF")){
+            		if (o1.getSacrificeFlies() == o2.getSacrificeFlies()) {
+            			return 0;
+            		}
+            		return (o1.getSacrificeFlies() > o2.getSacrificeFlies() ? -1 : 1);
+            	}
+            	else if (type.equals("BF")){
+            		if (o1.getBattersFaced() == o2.getBattersFaced()) {
+            			return 0;
+            		}
+            		return (o1.getBattersFaced() > o2.getBattersFaced() ? -1 : 1);
+            	}
+            	else if (type.equals("W")){
+            		if (o1.getWins() == o2.getWins()) {
+            			return 0;
+            		}
+            		return (o1.getWins() > o2.getWins() ? -1 : 1);
+            	}
+            	else if (type.equals("L")){
+            		if (o1.getLosses() == o2.getLosses()) {
+            			return 0;
+            		}
+            		return (o1.getLosses() > o2.getLosses() ? -1 : 1);
+            	}
             	else {
             		return 0;
             	}
