@@ -6,6 +6,16 @@
 <html>
 <head>
 <title>MLB Player Stats</title>
+<style>
+	body {
+  		font-family: Arial, serif;
+  		background-color: lightgrey;
+  		color: darkred;
+	}
+	th, a {
+  		color: black;
+	}
+</style>
 </head>
 <body>
 	<h1>MLB Player Stats</h1>

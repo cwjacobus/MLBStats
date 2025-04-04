@@ -4,6 +4,13 @@
 
 <html>
 <head>
+<style>
+	body {
+  		font-family: Arial, serif;
+  		background-color: lightgrey;
+  		color: darkred;
+	}
+</style>
 <title>MLB Stats</title>
 </head>
 <body>
@@ -31,6 +38,22 @@
 		</table>
 		<input type="hidden" name="teamMode" value="true"/>
 		<input type="submit" value="Get Team Player Stats"/>
+  	 </form>
+  	 <br><br>
+  	 <form action="getSeasonLeaders">
+      	<table>
+      		<tr><td>Year</td><td><input type="number" name="year" min="1900" max="2025" style="width: 60px;"/></td></tr>
+      		<tr><td>Team</td><td><select name="teamId" id="teamId" style="width: 275px;">
+      		<c:forEach items="${sessionScope.allMLBTeamsList}" var="mlbTeam">
+      			<c:set var="lastYearPlayed" value="${mlbTeam.lastYearPlayed}"/>
+      			<c:if test="${lastYearPlayed == ''}">
+      				<c:set var="lastYearPlayed" value="Present"/>
+      			</c:if>
+  				<option value="${mlbTeam.teamId}">${mlbTeam.fullTeamName} - ${mlbTeam.shortTeamName} (${mlbTeam.firstYearPlayed}-${lastYearPlayed})</option>	
+			</c:forEach>
+      		</select></td></tr>
+		</table>
+		<input type="submit" value="Get Season Leaders"/>
   	 </form>
 </body>
 </html>

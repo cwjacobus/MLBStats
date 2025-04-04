@@ -107,8 +107,10 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 			}
 		}
 		else { // team mode
-			mlbPitchingStatsList = DAO.getTeamMLBPitchingStatsListByYear(year, teamId);
-			mlbBattingStatsList = DAO.getTeamMLBBattingStatsListByYear(year, teamId);
+			if (pitchingSortType == null && battingSortType == null) {
+				mlbPitchingStatsList = DAO.getTeamMLBPitchingStatsListByYear(year, teamId);
+				mlbBattingStatsList = DAO.getTeamMLBBattingStatsListByYear(year, teamId);
+			}
 			if (mlbPitchingStatsList.size() == 0) {
 				context.put("errorMsg", "No pitching stats found for: " + year + "" + "TBD Team Name") ;
 				stack.push(context);
