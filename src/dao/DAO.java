@@ -10,6 +10,7 @@ import java.util.List;
 
 import data.MLBBattingStats;
 import data.MLBPitchingStats;
+import data.MLBSeasonLeaderStats;
 import data.MLBTeam;
 
 public class DAO {
@@ -111,21 +112,35 @@ public class DAO {
 		return mlbPitchingStatsList;
 	}
 	
+	public static List<MLBSeasonLeaderStats> getSeasonLeaderMLBStatsListByYear(Integer year, String statType, Integer limit) {
+		List<MLBSeasonLeaderStats>mlbSeasonLeaderStatsList = new ArrayList<>();
+		try {
+			// Get player statistics
+			Statement stmt2 = conn.createStatement();
+			String sql2 = "SELECT p.MLB_PLAYER_ID as id, p.FULL_NAME as name, t.SHORT_NAME as team, bs." + statType + " as stat " + 
+				"FROM MLB_PLAYER p, MLB_BATTING_STATS bs, MLB_TEAM t " +  
+				"WHERE p.MLB_PLAYER_ID = bs.MLB_PLAYER_ID " +
+				" AND (bs.MLB_TEAM_ID = t.TEAM_ID AND t.FIRST_YEAR_PLAYED <= bs.YEAR AND (t.LAST_YEAR_PLAYED >= bs.YEAR OR t.LAST_YEAR_PLAYED IS NULL)) AND " + 
+				" bs.YEAR = " + year + " ORDER BY " + statType + " DESC LIMIT " + limit;
+			ResultSet rs = stmt2.executeQuery(sql2);
+			MLBSeasonLeaderStats mlbSeasonLeaderStats;
+			boolean doubleStatType = statType.equalsIgnoreCase("INNINGS_PITCHED") || statType.equalsIgnoreCase("BATTING_AVERAGE") 
+				|| statType.equalsIgnoreCase("EARNED_RUN_AVERAGE");
+			while (rs.next()) {
+				mlbSeasonLeaderStats = new MLBSeasonLeaderStats(rs.getInt("id"), rs.getString("name"), rs.getString("team"), year, statType, 
+					(!doubleStatType ? rs.getInt("stat"):null), (doubleStatType ? rs.getDouble("stat"): null));
+				mlbSeasonLeaderStatsList.add(mlbSeasonLeaderStats);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return mlbSeasonLeaderStatsList;
+	}
+	
 	public static List<MLBBattingStats> getTeamMLBBattingStatsListByYear(Integer year, Integer teamId) {
 		List<MLBBattingStats>mlbBattingStatsList = new ArrayList<MLBBattingStats>();
 		try {
-			// Get positions played by player
-			/*Statement stmt1 = conn.createStatement();
-			String sql1 = playerId == null ? "select group_concat(POSITION) as pos, fs.YEAR as year FROM MLB_FIELDING_STATS fs, MLB_PLAYER p " + 
-				"WHERE p.MLB_PLAYER_ID = fs.MLB_PLAYER_ID AND p.FULL_NAME LIKE '%" + playerName + "%'" + " GROUP BY fs.YEAR ORDER BY fs.YEAR" 
-				:
-				"select group_concat(POSITION) as pos, fs.YEAR as year FROM MLB_FIELDING_STATS fs, MLB_PLAYER p " + 
-				"WHERE p.MLB_PLAYER_ID = fs.MLB_PLAYER_ID AND p.MLB_PLAYER_ID = " + playerId + " GROUP BY fs.YEAR ORDER BY fs.YEAR";
-			ResultSet rs = stmt1.executeQuery(sql1);
-			HashMap<Integer, String> positionMap = new HashMap<>();
-			while (rs.next()) {
-				positionMap.put(rs.getInt("year"), rs.getString("pos"));
-			}*/
 			// Get player statistics
 			Statement stmt2 = conn.createStatement();
 			String sql2 = "SELECT p.MLB_PLAYER_ID as id, p.FULL_NAME as name, p.PRIMARY_POSITION as pos, bs.YEAR as year, t.FULL_NAME as team, bs.AT_BATS as ab, bs.HITS as h, " + 

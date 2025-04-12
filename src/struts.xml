@@ -17,5 +17,11 @@
             <result name="success">/MLBStats.jsp</result>
             <result name="error">/ErrorPage.jsp</result>
       </action>
+      <action name="getSeasonLeaders" 
+            class="actions.GetSeasonLeaderStatsAction" 
+            method="execute">
+            <result name="success">/DisplaySeasonLeaderStats.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
+      </action>
    </package>
 </struts>
