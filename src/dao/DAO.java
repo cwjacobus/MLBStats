@@ -112,22 +112,29 @@ public class DAO {
 		return mlbPitchingStatsList;
 	}
 	
-	public static List<MLBSeasonLeaderStats> getSeasonLeaderMLBStatsListByYear(Integer year, String statType, Integer limit) {
+	public static List<MLBSeasonLeaderStats> getSeasonLeaderMLBStatsListByYear(Integer year, String stat, Integer limit, String league, boolean batter) {
 		List<MLBSeasonLeaderStats>mlbSeasonLeaderStatsList = new ArrayList<>();
 		try {
+			boolean battAvg = stat.equalsIgnoreCase("BATTING_AVERAGE");
+			if (battAvg) {
+				stat = "s.HITS/s.AT_BATS";
+			}
+			else {
+				stat = "s." + stat;
+			}
 			// Get player statistics
+			String leagueSQL = league != null && league.length() > 0 ? " AND t.league = '" + league + "'": "";
 			Statement stmt2 = conn.createStatement();
-			String sql2 = "SELECT p.MLB_PLAYER_ID as id, p.FULL_NAME as name, t.SHORT_NAME as team, bs." + statType + " as stat " + 
-				"FROM MLB_PLAYER p, MLB_BATTING_STATS bs, MLB_TEAM t " +  
-				"WHERE p.MLB_PLAYER_ID = bs.MLB_PLAYER_ID " +
-				" AND (bs.MLB_TEAM_ID = t.TEAM_ID AND t.FIRST_YEAR_PLAYED <= bs.YEAR AND (t.LAST_YEAR_PLAYED >= bs.YEAR OR t.LAST_YEAR_PLAYED IS NULL)) AND " + 
-				" bs.YEAR = " + year + " ORDER BY " + statType + " DESC LIMIT " + limit;
+			String sql2 = "SELECT p.MLB_PLAYER_ID as id, p.FULL_NAME as name, t.SHORT_NAME as team, " + stat + " as stat " + 
+				"FROM MLB_PLAYER p, " + (batter ? "MLB_BATTING_STATS":"MLB_PITCHING_STATS") +  " s, MLB_TEAM t " +  
+				"WHERE p.MLB_PLAYER_ID = s.MLB_PLAYER_ID " +
+				" AND (s.MLB_TEAM_ID = t.TEAM_ID AND t.FIRST_YEAR_PLAYED <= s.YEAR AND (t.LAST_YEAR_PLAYED >= s.YEAR OR t.LAST_YEAR_PLAYED IS NULL)) AND " + 
+				" s.YEAR = " + year + leagueSQL + " ORDER BY " + stat + " DESC LIMIT " + limit;
 			ResultSet rs = stmt2.executeQuery(sql2);
 			MLBSeasonLeaderStats mlbSeasonLeaderStats;
-			boolean doubleStatType = statType.equalsIgnoreCase("INNINGS_PITCHED") || statType.equalsIgnoreCase("BATTING_AVERAGE") 
-				|| statType.equalsIgnoreCase("EARNED_RUN_AVERAGE");
+			boolean doubleStatType = stat.equalsIgnoreCase("s.INNINGS_PITCHED") || battAvg || stat.equalsIgnoreCase("s.EARNED_RUN_AVERAGE");
 			while (rs.next()) {
-				mlbSeasonLeaderStats = new MLBSeasonLeaderStats(rs.getInt("id"), rs.getString("name"), rs.getString("team"), year, statType, 
+				mlbSeasonLeaderStats = new MLBSeasonLeaderStats(rs.getInt("id"), rs.getString("name"), rs.getString("team"), year, stat, 
 					(!doubleStatType ? rs.getInt("stat"):null), (doubleStatType ? rs.getDouble("stat"): null));
 				mlbSeasonLeaderStatsList.add(mlbSeasonLeaderStats);
 			}

@@ -18,11 +18,20 @@
 </style>
 </head>
 <body>
-	<h1>Season Leaders</h1>
-	
+	<h3>${headerDisplayText}</h3>
 	<table>
 	<c:forEach var="mlbSeasonLeaderStats" items="${mlbSeasonLeaderStatsList}" >
-		<tr><td>${mlbSeasonLeaderStats.playerName}</td><td>${mlbSeasonLeaderStats.teamName}</td><td>${mlbSeasonLeaderStats.intStat}</td></tr>
+		<tr>
+		<td>${mlbSeasonLeaderStats.playerName}</td><td>${mlbSeasonLeaderStats.teamName}</td>
+		<c:choose>
+		<c:when test="${mlbSeasonLeaderStats.intStat != null}">
+			<td>${mlbSeasonLeaderStats.intStat}</td>
+		</c:when>
+		<c:otherwise>
+			<td><fmt:formatNumber type="number" maxIntegerDigits="0" minFractionDigits="3" value="${mlbSeasonLeaderStats.doubleStat}" /></td>
+		</c:otherwise>
+		</c:choose>
+		</tr>
 	</c:forEach>
 	</table>
 </body>

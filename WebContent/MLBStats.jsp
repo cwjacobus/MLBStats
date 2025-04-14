@@ -46,12 +46,16 @@
       		<tr><td>League</td><td><select name="league" id="league" style="width: 80px;">
   				<option value="AL">AL Only</option>	
   				<option value="NL">NL Only</option>
-  				<option>All MLB</option>
+  				<option value="">All MLB</option>
       		</select></td></tr>
-      		<tr><td>Stat</td><td><select name="statType" id="statType" style="width: 80px;">
-  				<option value="HOME_RUNS">HR</option>	
-  				<option value="RBIS">RBI</option>
-  				<option value="STOLEN_BASES">SB</option>
+      		<tr><td>Stat Type</td><td><input type="radio" name="statType" value="batter">Batter<input type="radio" name="statType" value="pitcher">Pitcher</td></tr>
+      		<tr><td>Stat</td><td><select name="stat" id="stat" style="width: 80px;">
+      			<c:forEach items="${sessionScope.battingStatsMap}" var="battingStat">
+      				<option value="${battingStat.key}">${battingStat.value}</option>
+  				</c:forEach>
+  				<c:forEach items="${sessionScope.pitchingStatsMap}" var="pitchingStat">
+      				<option value="${pitchingStat.key}">${pitchingStat.value}</option>
+  				</c:forEach>
       		</select></td></tr>
 		</table>
 		<input type="submit" value="Get Season Leaders"/>

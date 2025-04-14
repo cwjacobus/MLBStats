@@ -1,6 +1,7 @@
 package actions;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,10 +19,11 @@ public class GetSeasonLeaderStatsAction extends ActionSupport implements Session
 	private static final long serialVersionUID = 1L;
 	Map<String, Object> userSession;
 	Integer year;
+	String stat;
 	String statType;
 	String league;
 
-	//@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	public String execute() throws Exception {
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
@@ -30,10 +32,18 @@ public class GetSeasonLeaderStatsAction extends ActionSupport implements Session
 			stack.push(context);
 			return "error";
 	    }
-	    
+	    if (statType == null || year == null) {
+        	context.put("errorMsg", "Stat type and year are required!");
+			stack.push(context);
+			return "error";
+        }
+	    LinkedHashMap<String, String> battingStatsMap = (LinkedHashMap<String, String>)userSession.get("battingStatsMap");
+	    LinkedHashMap<String, String> pitchingStatsMap = (LinkedHashMap<String, String>)userSession.get("pitchingStatsMap");
 	    List<MLBSeasonLeaderStats> mlbSeasonLeaderStatsList;
-	    mlbSeasonLeaderStatsList = DAO.getSeasonLeaderMLBStatsListByYear(year, statType, 50);
+	    mlbSeasonLeaderStatsList = DAO.getSeasonLeaderMLBStatsListByYear(year, stat, 50, league, statType.equalsIgnoreCase("batter"));
 	    context.put("mlbSeasonLeaderStatsList", mlbSeasonLeaderStatsList);
+	    context.put("headerDisplayText", year + " " + (league == null || league.length() == 0 ? "MLB " : league + " ") + 
+	    	(statType.equalsIgnoreCase("batter") ? battingStatsMap.get(stat) : pitchingStatsMap.get(stat)) + " Leaders");
 	    stack.push(context);
 	    return "success";
 	}
@@ -49,6 +59,14 @@ public class GetSeasonLeaderStatsAction extends ActionSupport implements Session
 
 	public void setYear(Integer year) {
 		this.year = year;
+	}
+	
+	public String getStat() {
+		return stat;
+	}
+
+	public void setStat(String stat) {
+		this.stat = stat;
 	}
 
 	public String getStatType() {
