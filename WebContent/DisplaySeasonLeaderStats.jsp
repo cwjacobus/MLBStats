@@ -24,12 +24,18 @@
 		<tr>
 		<td>${mlbSeasonLeaderStats.playerName}</td><td>${mlbSeasonLeaderStats.teamName}</td>
 		<c:choose>
-		<c:when test="${mlbSeasonLeaderStats.intStat != null}">
-			<td>${mlbSeasonLeaderStats.intStat}</td>
-		</c:when>
-		<c:otherwise>
-			<td><fmt:formatNumber type="number" maxIntegerDigits="0" minFractionDigits="3" value="${mlbSeasonLeaderStats.doubleStat}" /></td>
-		</c:otherwise>
+			<c:when test="${mlbSeasonLeaderStats.intStat != null}">
+				<td>${mlbSeasonLeaderStats.intStat}</td>
+			</c:when>
+			<c:when test="${mlbSeasonLeaderStats.statType == 'EARNED_RUN_AVERAGE'}">
+				<td><fmt:formatNumber type="number" maxIntegerDigits="1" minFractionDigits="3" value="${mlbSeasonLeaderStats.doubleStat}" /></td>
+			</c:when>
+			<c:when test="${mlbSeasonLeaderStats.statType == 'BATTING_AVERAGE'}">
+				<td><fmt:formatNumber type="number" maxIntegerDigits="0" minFractionDigits="3" value="${mlbSeasonLeaderStats.doubleStat}" /></td>
+			</c:when>
+			<c:otherwise> <!-- INNINGS_PITCHED -->
+				<td>${mlbSeasonLeaderStats.doubleStat}</td>
+			</c:otherwise> 	
 		</c:choose>
 		</tr>
 	</c:forEach>

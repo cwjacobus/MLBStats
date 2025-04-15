@@ -43,6 +43,7 @@ public class InitAction extends ActionSupport implements SessionAware {
 	LinkedHashMap<String, String> pitchingStatsMap  = new LinkedHashMap<String, String>() {
 		private static final long serialVersionUID = 1L;
 	{
+		put("EARNED_RUN_AVERAGE", "Earned Run Average");
 		put("INNINGS_PITCHED", "Innings Pitched");
 		put("WALKS", "Walks(Pitcher)");
 		put("STRIKEOUTS", "Strikeouts(Pitcher)");
