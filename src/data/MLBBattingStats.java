@@ -1,11 +1,11 @@
 package data;
 
 public class MLBBattingStats {
-	private int mlbPlayerId;
+	private Integer mlbPlayerId;
 	private String playerName;
 	private String pos;
 	private String teamName;
-	private int year;
+	private Integer year;
 	private int atBats;
 	private int hits;
 	private double battingAverage;
@@ -21,7 +21,7 @@ public class MLBBattingStats {
 	private int plateAppearances;
 	private int caughtStealing;
 
-	public MLBBattingStats(int mlbPlayerId, String playerName, String pos, String teamName, int year, int atBats, int hits,
+	public MLBBattingStats(Integer mlbPlayerId, String playerName, String pos, String teamName, Integer year, int atBats, int hits,
 			double battingAverage, int doubles, int triples, int homeRuns, int walks, int strikeOuts, int hitByPitch,
 			int runs, int rbis, int stolenBases, int plateAppearances, int caughtStealing) {
 		this.mlbPlayerId = mlbPlayerId;
@@ -45,11 +45,11 @@ public class MLBBattingStats {
 		this.caughtStealing = caughtStealing;
 	}
 	
-	public int getMlbPlayerId() {
+	public Integer getMlbPlayerId() {
 		return mlbPlayerId;
 	}
 
-	public void setMlbPlayerId(int mlbPlayerId) {
+	public void setMlbPlayerId(Integer mlbPlayerId) {
 		this.mlbPlayerId = mlbPlayerId;
 	}
 
@@ -77,11 +77,11 @@ public class MLBBattingStats {
 		this.teamName = teamName;
 	}
 
-	public int getYear() {
+	public Integer getYear() {
 		return year;
 	}
 
-	public void setYear(int year) {
+	public void setYear(Integer year) {
 		this.year = year;
 	}
 
@@ -197,8 +197,24 @@ public class MLBBattingStats {
 		this.caughtStealing = caughtStealing;
 	}
 
+	@Override
 	public String toString() {
 		return "playerName=" + playerName + " teamName=" + teamName;
 	}
+	
+	@Override
+    public boolean equals(Object obj) {
+        if(obj instanceof MLBBattingStats)
+        {
+        	MLBBattingStats temp = (MLBBattingStats) obj;
+            if (this.mlbPlayerId.intValue() == temp.mlbPlayerId.intValue() && this.year.intValue() == temp.year.intValue())
+                return true;
+        }
+        return false;
+    }
 
+    @Override
+    public int hashCode() {
+        return (this.mlbPlayerId.hashCode() + this.year.hashCode());        
+    }
 }

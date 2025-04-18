@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.SessionAware;
+import org.json.JSONObject;
 
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import com.opensymphony.xwork2.ActionContext;
@@ -87,6 +88,10 @@ public class InitAction extends ActionSupport implements SessionAware {
 	    stack.push(context);
 	    userSession.put("battingStatsMap", battingStatsMap);
 	    userSession.put("pitchingStatsMap", pitchingStatsMap);
+	    JSONObject battingStatsMapJSON = new JSONObject(battingStatsMap);
+		JSONObject pitchingStatsMapJSON = new JSONObject(pitchingStatsMap);
+		userSession.put("battingStatsMapJSON", battingStatsMapJSON);
+	    userSession.put("pitchingStatsMapJSON", pitchingStatsMapJSON);
 	    return "success";
 	}
 	

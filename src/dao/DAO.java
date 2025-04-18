@@ -119,13 +119,13 @@ public class DAO {
 			boolean battAvg = stat.equalsIgnoreCase("BATTING_AVERAGE");
 			boolean era = stat.equalsIgnoreCase("EARNED_RUN_AVERAGE");
 			if (battAvg) {
-				stat = "s.HITS/s.AT_BATS";
+				stat = "SUM(s.HITS)/SUM(s.AT_BATS)";
 			}
 			else if (era) {
-				stat = "s.EARNED_RUNS_ALLOWED*9/(FLOOR(s.INNINGS_PITCHED)+(MOD(s.INNINGS_PITCHED,1)*3.33))";  // Innings pitched must be converted from X.1, X.2
+				stat = "SUM(s.EARNED_RUNS_ALLOWED)*9/(FLOOR(SUM(s.INNINGS_PITCHED))+(MOD(SUM(s.INNINGS_PITCHED),1)*3.33))";  // Innings pitched must be converted from X.1, X.2
 			}
 			else {
-				stat = "s." + stat;
+					stat = "SUM(s." + stat + ")";
 			}
 			// Get player statistics
 			String leagueSQL = league != null && league.length() > 0 ? " AND t.league = '" + league + "'": "";
@@ -134,7 +134,7 @@ public class DAO {
 				"FROM MLB_PLAYER p, " + (batter ? "MLB_BATTING_STATS":"MLB_PITCHING_STATS") +  " s, MLB_TEAM t " +  
 				"WHERE p.MLB_PLAYER_ID = s.MLB_PLAYER_ID " +
 				" AND (s.MLB_TEAM_ID = t.TEAM_ID AND t.FIRST_YEAR_PLAYED <= s.YEAR AND (t.LAST_YEAR_PLAYED >= s.YEAR OR t.LAST_YEAR_PLAYED IS NULL)) AND " + 
-				" s.YEAR = " + year + leagueSQL + " ORDER BY " + stat + (era ? "" : " DESC") + " LIMIT " + limit;
+				" s.YEAR = " + year + leagueSQL + " GROUP BY s.MLB_PLAYER_ID ORDER BY " + stat + (era ? "" : " DESC") + " LIMIT " + limit;
 			ResultSet rs = stmt2.executeQuery(sql2);
 			MLBSeasonLeaderStats mlbSeasonLeaderStats;
 			boolean doubleStatType = stat.equalsIgnoreCase("s.INNINGS_PITCHED") || battAvg || era;

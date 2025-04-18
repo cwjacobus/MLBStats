@@ -4,20 +4,56 @@
 
 <html>
 <head>
-<style>
-	body {
-  		font-family: Arial, serif;
-  		background-color: lightgrey;
-  		color: darkred;
-	}
-</style>
-<title>MLB Stats</title>
+	<title>MLB Stats</title>
+	<style>
+		body {
+  			font-family: Arial, serif;
+  			background-color: lightgrey;
+  			color: darkred;
+		}
+	</style>
+	<script type="text/javascript">
+		battingStatsMap = ${sessionScope.battingStatsMapJSON};
+    	pitchingStatsMap = ${sessionScope.pitchingStatsMapJSON};
+    	
+		function addDropDown(key, value, ddElement) {
+			var option = document.createElement('option');
+			option.text = value;
+			option.value = key;
+			ddElement.add(option);
+		}
+		
+		function populateStatDropDown(batter) {
+			statSeasonLeaders = document.getElementById("statSeasonLeaders");
+			removeAllFromDropDown(statSeasonLeaders);
+			if (batter) {
+				for (const [key, value] of Object.entries(battingStatsMap)) {
+					  //console.log(key, value);
+					  addDropDown(key, value, statSeasonLeaders);
+				}
+			}
+			else {
+				for (const [key, value] of Object.entries(pitchingStatsMap)) {
+					  addDropDown(key, value, statSeasonLeaders);
+				}
+			}
+		}
+		
+		function removeAllFromDropDown(ddElement) {
+			var len = ddElement.length;
+			for (i=0; i < len;  i++) {
+				ddElement.remove(0);
+			}
+		}
+	</script>
 </head>
 <body>
 	<h1>MLB Stats</h1>
    	<form action="getPlayerStats">
       	<table>
-      		<tr><td>Type</td><td><input type="radio" name="playerType" value="batter">Batter<input type="radio" name="playerType" value="pitcher">Pitcher</td></tr>
+      		<tr><td>Type</td><td>
+      			<input type="radio" name="playerType" value="batter">Batter
+      			<input type="radio" name="playerType" value="pitcher">Pitcher</td></tr>
       		<tr><td>Player Name</td><td><input type="text" name="playerName" size="10"/></td></tr>
 		</table>
 		<input type="submit" value="Get Player Stats"/>
@@ -48,14 +84,10 @@
   				<option value="NL">NL Only</option>
   				<option value="">All MLB</option>
       		</select></td></tr>
-      		<tr><td>Stat Type</td><td><input type="radio" name="statType" value="batter">Batter<input type="radio" name="statType" value="pitcher">Pitcher</td></tr>
-      		<tr><td>Stat</td><td><select name="stat" id="stat" style="width: 80px;">
-      			<c:forEach items="${sessionScope.battingStatsMap}" var="battingStat">
-      				<option value="${battingStat.key}">${battingStat.value}</option>
-  				</c:forEach>
-  				<c:forEach items="${sessionScope.pitchingStatsMap}" var="pitchingStat">
-      				<option value="${pitchingStat.key}">${pitchingStat.value}</option>
-  				</c:forEach>
+      		<tr><td>Stat Type</td><td>
+      			<input type="radio" name="statType" value="batter" onchange="populateStatDropDown(true)">Batter
+      			<input type="radio" name="statType" value="pitcher" onchange="populateStatDropDown(false)">Pitcher</td></tr>
+      		<tr><td>Stat</td><td><select name="statSeasonLeaders" id="statSeasonLeaders" style="width: 80px;">
       		</select></td></tr>
 		</table>
 		<input type="submit" value="Get Season Leaders"/>

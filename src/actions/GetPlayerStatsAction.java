@@ -110,6 +110,18 @@ public class GetPlayerStatsAction extends ActionSupport implements SessionAware 
 			if (pitchingSortType == null && battingSortType == null) {
 				mlbPitchingStatsList = DAO.getTeamMLBPitchingStatsListByYear(year, teamId);
 				mlbBattingStatsList = DAO.getTeamMLBBattingStatsListByYear(year, teamId);
+				/*if ((teamId == 113 && year >= 1954 && year <= 1959) || // Remove duplicates for the 3 teams with concurrent teams CIN BRK ATL
+					(teamId == 119 && year >= 1914 && year <= 1931) ||
+					(teamId == 144 && year >= 1936 && year <= 1940)) {
+						Set<MLBBattingStats> sb = new HashSet<>();
+						sb.addAll(mlbBattingStatsList);         
+						mlbBattingStatsList = new ArrayList<>();
+						mlbBattingStatsList.addAll(sb);
+						Set<MLBPitchingStats> sp = new HashSet<>();
+						sp.addAll(mlbPitchingStatsList);         
+						mlbPitchingStatsList = new ArrayList<>();
+						mlbPitchingStatsList.addAll(sp);
+				}*/
 			}
 			if (mlbPitchingStatsList.size() == 0) {
 				context.put("errorMsg", "No pitching stats found for: " + year + "" + "TBD Team Name") ;

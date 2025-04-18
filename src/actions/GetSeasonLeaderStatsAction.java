@@ -19,7 +19,7 @@ public class GetSeasonLeaderStatsAction extends ActionSupport implements Session
 	private static final long serialVersionUID = 1L;
 	Map<String, Object> userSession;
 	Integer year;
-	String stat;
+	String statSeasonLeaders;
 	String statType;
 	String league;
 
@@ -40,10 +40,10 @@ public class GetSeasonLeaderStatsAction extends ActionSupport implements Session
 	    LinkedHashMap<String, String> battingStatsMap = (LinkedHashMap<String, String>)userSession.get("battingStatsMap");
 	    LinkedHashMap<String, String> pitchingStatsMap = (LinkedHashMap<String, String>)userSession.get("pitchingStatsMap");
 	    List<MLBSeasonLeaderStats> mlbSeasonLeaderStatsList;
-	    mlbSeasonLeaderStatsList = DAO.getSeasonLeaderMLBStatsListByYear(year, stat, 50, league, statType.equalsIgnoreCase("batter"));
+	    mlbSeasonLeaderStatsList = DAO.getSeasonLeaderMLBStatsListByYear(year, statSeasonLeaders, 50, league, statType.equalsIgnoreCase("batter"));
 	    context.put("mlbSeasonLeaderStatsList", mlbSeasonLeaderStatsList);
 	    context.put("headerDisplayText", year + " " + (league == null || league.length() == 0 ? "MLB " : league + " ") + 
-	    	(statType.equalsIgnoreCase("batter") ? battingStatsMap.get(stat) : pitchingStatsMap.get(stat)) + " Leaders");
+	    	(statType.equalsIgnoreCase("batter") ? battingStatsMap.get(statSeasonLeaders) : pitchingStatsMap.get(statSeasonLeaders)) + " Leaders");
 	    stack.push(context);
 	    return "success";
 	}
@@ -61,12 +61,12 @@ public class GetSeasonLeaderStatsAction extends ActionSupport implements Session
 		this.year = year;
 	}
 	
-	public String getStat() {
-		return stat;
+	public String getStatSeasonLeaders() {
+		return statSeasonLeaders;
 	}
 
-	public void setStat(String stat) {
-		this.stat = stat;
+	public void setStatSeasonLeaders(String statSeasonLeaders) {
+		this.statSeasonLeaders = statSeasonLeaders;
 	}
 
 	public String getStatType() {
